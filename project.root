@@ -1,0 +1,5 @@
+﻿INCLUDE_CONFIGURATIONS = 
+EXCLUDE_CONFIGURATIONS = 
+VERSION = sources/confbuild.hpp
+
+
