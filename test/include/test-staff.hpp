@@ -1,10 +1,10 @@
 
 // [2021y-02m-05d] Idrisov Denis R.
 #pragma once
-#include <tools/features.hpp>
 //==============================================================================
 //==============================================================================
 
+#include <tools/features.hpp>
 #include <cassert>
 #include <string>
 
