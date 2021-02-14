@@ -19,6 +19,7 @@
 
 //===== tools ================ (pre11) (c++11) =============||==================
     #define TEST_TOOLS_VALID                                // ready
+    #define TEST_TOOLS_STRLENGTH                            // ready
     #define TEST_TOOLS_STRLEN                               // ready
 
 //==============================================================================

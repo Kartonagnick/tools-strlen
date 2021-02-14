@@ -43,6 +43,14 @@ namespace tools
         size_t strlen(char*    text) dNOEXCEPT;
         size_t strlen(wchar_t* text) dNOEXCEPT;
 
+        inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
+        {
+            (void)n;
+            dASSERT(n != 0 && i < n && 
+                "tools::strlen: invalid null-terminator");
+            return i;
+        }
+
     } // namespace old
 
     namespace cpp11
@@ -67,21 +75,13 @@ namespace tools
         #define dSMALL_ARRAY dEXPRESSION(n <  256)
         #define dBIG_ARRAY   dEXPRESSION(n >= 256)
 
-        #ifndef NDEBUG
-        inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
-        {
-            dASSERT(n != 0 && i < n && "tools::strlen: invalid null-terminator");
-            return i;
-        }
-        #endif
-
         template<class ch, size_t n> inline
         dBIG_ARRAY strlen(const ch(&text)[n]) dNOEXCEPT
         {
             #ifdef NDEBUG
                 return old::strlen(&text[0]);
             #else
-                return cpp11::limit(old::strlen(&text[0]), n);
+                return old::limit(old::strlen(&text[0]), n);
             #endif
         }
 

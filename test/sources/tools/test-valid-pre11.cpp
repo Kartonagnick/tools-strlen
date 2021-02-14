@@ -39,36 +39,73 @@ namespace test_valid_pre11
         type (&ref)[1] = arr;
         ASSERT_TRUE(me::valid(arr));
         ASSERT_TRUE(me::valid(ref));
+        #ifdef dHAS_RVALUE_ARRAY
+            type (&&rval)[1] = std::move(ref);
+            ASSERT_TRUE(me::valid(rval));
+            ASSERT_TRUE(me::valid(std::move(arr )));
+            ASSERT_TRUE(me::valid(std::move(ref )));
+            ASSERT_TRUE(me::valid(std::move(rval)));
+        #endif
     }
-
+	
     template<class str> void string()
     {
         typedef typename str::value_type ch;
 
         ch arr[2] = {};
-        str  txt  = arr;
+        str txt   = arr;
         str& ref  = txt;
 
         ASSERT_TRUE(me::valid(txt ));
         ASSERT_TRUE(me::valid(ref ));
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        str&& rval = std::move(txt);
+
+        ASSERT_TRUE(me::valid(rval));
+        ASSERT_TRUE(me::valid(std::move(txt )));
+        ASSERT_TRUE(me::valid(std::move(ref )));
+        ASSERT_TRUE(me::valid(std::move(rval)));
+        #endif
     }
 
     template<class ptr> void pointer()
     {
-        ptr  val = 0;
+        ptr val  = 0;
         ptr& ref = val;
-        ASSERT_TRUE(!me::valid(val));
-        ASSERT_TRUE(!me::valid(ref));
+
+        ASSERT_TRUE(!me::valid(val ));
+        ASSERT_TRUE(!me::valid(ref ));
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        ptr&& rval = std::move(ref);
+
+        ASSERT_TRUE(!me::valid(rval));
+        ASSERT_TRUE(!me::valid(std::move(val )));
+        ASSERT_TRUE(!me::valid(std::move(ref )));
+        ASSERT_TRUE(!me::valid(std::move(rval)));
+        #endif
     }
 
     template<class ch, class ptr, class src> 
     void pointer(const src& text)
     {
         dMAKE_ARRAY(arr);
-        ptr  val = arr;
+
+        ptr val  = arr;
         ptr& ref = val;
-        ASSERT_TRUE(me::valid(val));
-        ASSERT_TRUE(me::valid(ref));
+
+        ASSERT_TRUE(me::valid(val ));
+        ASSERT_TRUE(me::valid(ref ));
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        ptr&& rval = std::move(ref);
+
+        ASSERT_TRUE(me::valid(rval));
+        ASSERT_TRUE(me::valid(std::move(val )));
+        ASSERT_TRUE(me::valid(std::move(ref )));
+        ASSERT_TRUE(me::valid(std::move(rval)));
+        #endif
     }
 
 } // namespace test_valid_pre11

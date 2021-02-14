@@ -15,10 +15,10 @@
 //==============================================================================
 namespace tools
 {
-    #define dTEMPLATE template<class s> inline
-
     namespace old
     {
+        #define dTEMPLATE template<class s> inline
+
         dTEMPLATE size_t strlen(s* text) dNOEXCEPT
         {
             dASSERT(text);
@@ -33,7 +33,7 @@ namespace tools
 
         inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
         {
-            (void)n;
+            (void) n;
             dASSERT(n != 0 && i < n && 
                 "tools::strlen: invalid null-terminator");
             return i;
@@ -41,33 +41,41 @@ namespace tools
 
     } // namespace old
 
-    dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return old::strlen(p); }
 
-    template<class ch, size_t n> 
-    inline size_t strlen(const ch(&text)[n]) dNOEXCEPT
+    namespace pre11
     {
-        const size_t len = ::tools::old::strlen(text);
-        return old::limit(len, n);
-    }
+        dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return old::strlen(p); }
 
-    dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
-        { return text.length(); }
+        template<class ch, size_t n> inline
+        size_t strlen(const ch(&text)[n]) dNOEXCEPT
+        {
+            const size_t len = ::tools::old::strlen(text);
+            return old::limit(len, n);
+        }
+
+        dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
+            { return text.length(); }
+
+    }  // namespace pre11
 
     #ifdef dHAS_RVALUE_REFERENCES
-    dTEMPLATE size_t strlen(s*&& p)                dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* const&& p)          dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile&& p)       dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const&& p) dNOEXCEPT { return old::strlen(p); }
-    #endif
 
-    #ifdef dHAS_RVALUE_ARRAY
-    template<class ch, size_t n> 
-    inline size_t strlen(const ch(&&text)[n]) dNOEXCEPT
-        { return ::tools::strlen(text); }
-    #endif
+        dTEMPLATE size_t strlen(s&& text) dNOEXCEPT
+        { 
+            return pre11::strlen(text);
+        }
+
+    #else
+
+        dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
+        { 
+            return pre11::strlen(text);
+        }
+
+    #endif // !dHAS_RVALUE_ARRAY
 
     #undef dTEMPLATE
 

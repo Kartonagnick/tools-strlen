@@ -36,15 +36,21 @@ namespace tools
 
     } // namespace stringed_v1
 
-    #ifdef dHAS_CPP11
+    #ifdef dHAS_RVALUE_REFERENCES
+
         dTEMPLATE bool valid(t&& p) dNOEXCEPT 
-            { return ::tools::stringed_v1::valid(p); }
+        {
+            return ::tools::stringed_v1::valid(p);
+        }
+
     #else
+
         dTEMPLATE bool valid(const t& p) dNOEXCEPT 
         { 
             return ::tools::stringed_v1::valid(p);
         }
-    #endif // !dHAS_CPP11
+
+    #endif // !dHAS_RVALUE_REFERENCES
 
     #undef dATTRIBUTES
     #undef dTEMPLATE
