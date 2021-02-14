@@ -31,6 +31,14 @@ namespace tools
         size_t strlen(char*    text) dNOEXCEPT;
         size_t strlen(wchar_t* text) dNOEXCEPT;
 
+        inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
+        {
+            (void)n;
+            dASSERT(n != 0 && i < n && 
+                "tools::strlen: invalid null-terminator");
+            return i;
+        }
+
     } // namespace old
 
     dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
@@ -41,13 +49,12 @@ namespace tools
     template<class ch, size_t n> 
     inline size_t strlen(const ch(&text)[n]) dNOEXCEPT
     {
-        return ::tools::old::strlen(text);
+        const size_t len = ::tools::old::strlen(text);
+        return old::limit(len, n);
     }
 
     dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
-    { 
-        return text.length();
-    }
+        { return text.length(); }
 
     #ifdef dHAS_RVALUE_REFERENCES
     dTEMPLATE size_t strlen(s*&& p)                dNOEXCEPT { return old::strlen(p); }
@@ -59,9 +66,7 @@ namespace tools
     #ifdef dHAS_RVALUE_ARRAY
     template<class ch, size_t n> 
     inline size_t strlen(const ch(&&text)[n]) dNOEXCEPT
-    {
-        return ::tools::strlen(text);
-    }
+        { return ::tools::strlen(text); }
     #endif
 
     #undef dTEMPLATE

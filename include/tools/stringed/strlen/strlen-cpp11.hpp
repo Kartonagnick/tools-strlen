@@ -59,6 +59,15 @@ namespace tools
         #define dSMALL_ARRAY dEXPRESSION(n <  256)
         #define dBIG_ARRAY   dEXPRESSION(n >= 256)
 
+        #ifndef NDEBUG
+        inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
+        {
+            dASSERT(n != 0 && i < n &&
+                "tools::strlen: invalid null-terminator");
+            return i;
+        }
+        #endif
+
     } // namespace old
 
     dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
@@ -66,14 +75,17 @@ namespace tools
     dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return old::strlen(p); }
     dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return old::strlen(p); }
 
+
     template<class ch, size_t n> inline
     dBIG_ARRAY strlen(const ch(&text)[n]) dNOEXCEPT
     {
-        for (size_t i = 0; i != n; ++i)
-            if (text[i] == 0)
-                return i;
-        dASSERT(false && "tools::strlen: invalid null-terminator");
-        return n;
+        const auto* ptr = text;
+        const size_t len = old::strlen(ptr);
+        #ifdef NDEBUG
+            return len;
+        #else
+            return old::limit(len, n);
+        #endif
     }
 
     template<class ch, size_t n> constexpr

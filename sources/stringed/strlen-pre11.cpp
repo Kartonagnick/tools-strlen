@@ -13,10 +13,11 @@ namespace tools
         size_t strlen(char* text) dNOEXCEPT
         {
             dASSERT(text);
+
             #ifdef _MSC_VER
-            return ::std::strlen(text);
+                return ::std::strlen(text);
             #else
-            return __builtin_strlen(text);
+                return __builtin_strlen(text);
             #endif
         }
 

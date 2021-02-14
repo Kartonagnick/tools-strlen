@@ -64,6 +64,14 @@ namespace tools
             }
         #endif // !__cpp_char8_t
 
+        constexpr size_t limit(const size_t i, const size_t n) dNOEXCEPT
+        {
+            (void)n;
+            dASSERT(n != 0 && i < n && 
+                "tools::strlen: invalid null-terminator");
+            return i;
+        }
+
     } // namespace cpp17
 
     dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return cpp17::strlen(p); }
@@ -74,12 +82,7 @@ namespace tools
     template<class ch, size_t n> constexpr
     size_t strlen(const ch(&text)[n]) dNOEXCEPT
     {
-        size_t i = 0;
-        for (; i != n; ++i)
-            if (text[i] == 0)
-                return i;
-        dASSERT((n == 0 || i == n - 1) && "tools::strlen: invalid null-terminator");
-        return n;
+        return cpp17::limit(cpp17::strlen(&text[0]), n);
     }
 
     dTEMPLATE size_t strlen(const s& text) dNOEXCEPT

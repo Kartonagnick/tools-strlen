@@ -11,16 +11,16 @@
 //==============================================================================
 
 #if defined(dHAS_CPP17)
-    #pragma message("tools/strlen: build for c++17 (or newer)")
+    dMESSAGE("tools/strlen: build for c++17 (or newer)")
     #include <tools/stringed/strlen/strlen-cpp17.hpp>
 #elif defined(dHAS_CPP14)
-    #pragma message("tools/strlen: build for c++14")
+    dMESSAGE("tools/strlen: build for c++14")
     #include <tools/stringed/strlen/strlen-cpp14.hpp>
 #elif defined(dHAS_CPP11)
-    #pragma message("tools/strlen: build for c++11")
+    dMESSAGE("tools/strlen: build for c++11")
     #include <tools/stringed/strlen/strlen-cpp11.hpp>
 #else
-    #pragma message("tools/strlen: build for pre11")
+    dMESSAGE("tools/strlen: build for pre11")
     #include <tools/stringed/strlen/strlen-pre11.hpp>
 #endif
 

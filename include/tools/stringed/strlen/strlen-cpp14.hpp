@@ -28,6 +28,14 @@ namespace tools
             return static_cast<size_t>(p - text);
         }
 
+        constexpr size_t limit(const size_t i, const size_t n) dNOEXCEPT
+        {
+            (void)n;
+            dASSERT(n != 0 && i < n && 
+                "tools::strlen: invalid null-terminator");
+            return i;
+        }
+
     } // namespace cpp14
 
     dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return cpp14::strlen(p); }
@@ -41,8 +49,7 @@ namespace tools
         for (size_t i = 0; i != n; ++i)
             if (text[i] == 0)
                 return i;
-        dASSERT(false && "tools::strlen: invalid null-terminator");
-        return n;
+        return cpp17::limit(n, n);
     }
 
     dTEMPLATE size_t strlen(const s& text) dNOEXCEPT

@@ -9,15 +9,15 @@ rem ============================================================================
 
     rem set "eDEBUG=ON"
 
-    set "VC=msvc:64:debug:static"
-    rem set "MG=mingw:64:all:static"
-    set "order=%VC%"
+    set "VC=msvc:64:all:static"
+    set "MG=mingw:64:all:static"
+    rem set "order=%VC%"
     rem set "order=%MG%"
     rem set "order=%VC%; %MG%"
-    rem set "order=all"
+    set "order=all"
 
     rem for development
-    (call :generate) && (goto :success) || (goto :failed)
+    rem (call :generate) && (goto :success) || (goto :failed)
 
     rem (call :clean)    || (goto :failed)
     (call :build)    || (goto :failed)
