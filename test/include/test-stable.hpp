@@ -17,6 +17,15 @@
 //===== modern/classic =====================================||==================
     #define TEST_MODERN                                     // ready!
     #define TEST_CLASSIC                                    // ready!
+
+//===== tools/types ========== (pre11) (c++11) =============||==================
+    #define TEST_TOOLS_IF_                                  // ready
+
+//===== tools ================ (pre11) (c++11) =============||==================
+    #define TEST_TOOLS_VALID                                // ready
+    #define TEST_TOOLS_STRLENGTH                            // ready
+    #define TEST_TOOLS_STRLEN                               // ready
+
 //==============================================================================
 //==============================================================================
 
