@@ -7,53 +7,43 @@
 #ifdef TEST_TOOLS_STRLEN
 
 #include <tools/features.hpp>
-#if defined(dHAS_CPP17) && !defined(dHAS_CPP20)
+#if defined(dHAS_CPP11) && !defined(dHAS_CPP14)
 
 #define dTEST_COMPONENT tools
 #define dTEST_METHOD strlen
-#define dTEST_TAG cpp17
+#define dTEST_TAG cpp11
 
 #include <tools/strlen.hpp>
 #include "test-staff.hpp"
 
 #ifdef dHAS_RVALUE_ARRAY
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> dHAS_RVALUE_ARRAY")
+    dMESSAGE("[test][cpp11] tools/strlen.hpp: enabled -> dHAS_RVALUE_ARRAY")
 #else
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: disabled -> dHAS_RVALUE_ARRAY")
-#endif
-dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> __builtin_strlen")
-#ifdef _HAS_U8_INTRINSICS
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> __builtin_u8strlen")
+    dMESSAGE("[test][cpp11] tools/strlen.hpp: disabled -> dHAS_RVALUE_ARRAY")
 #endif
 
 namespace me = ::tools;
 using namespace staff;
 //==============================================================================
 //==============================================================================
-namespace test_strlen_cpp17
+namespace test_strlen_cpp11
 {
-    constexpr const char*    meow_a =  "meow";
-    constexpr const wchar_t* meow_w = L"meow";
+    static_assert(me::strlen(  "meow") == 4, "error(1): expected 'true'");
+    static_assert(me::strlen( L"meow") == 4, "error(2): expected 'true'");
+    static_assert(me::strlen(u8"meow") == 4, "error(3): expected 'true'");
 
-    static_assert(me::strlen(meow_a) == 4             , "error(1): expected 'true'"  );
-    static_assert(me::strlen(meow_w) == 4             , "error(2): expected 'true'"  );
-    static_assert(me::strlen(std::move(meow_a)) == 4  , "error(3): expected 'true'"  );
-    static_assert(me::strlen(std::move(meow_w)) == 4  , "error(4): expected 'true'"  );
+    #ifdef dHAS_RVALUE_ARRAY
+    static_assert(me::strlen(std::move("meow"  )) == 4, "error(4): expected 'true'");
+    static_assert(me::strlen(std::move(L"meow" )) == 4, "error(5): expected 'true'");
+    static_assert(me::strlen(std::move(u8"meow")) == 4, "error(6): expected 'true'");
+    #endif
 
-    static_assert(me::strlen(  "meow") == 4           , "error(5): expected 'true'"  );
-    static_assert(me::strlen( L"meow") == 4           , "error(6): expected 'true'"  );
-    static_assert(me::strlen(u8"meow") == 4           , "error(7): expected 'true'"  );
-
-    static_assert(me::strlen(std::move("meow"  )) == 4, "error(8): expected 'true'"  );
-    static_assert(me::strlen(std::move(L"meow" )) == 4, "error(9): expected 'true'"  );
-    static_assert(me::strlen(std::move(u8"meow")) == 4, "error(10): expected 'true'" );
-
-} // namespace test_strlen_cpp17
-namespace test = test_strlen_cpp17;
+} // namespace test_strlen_cpp11
+namespace test = test_strlen_cpp11;
 
 //..............................................................................
 
-namespace test_strlen_cpp17
+namespace test_strlen_cpp11
 {
     template<class type> void array()
     {
@@ -172,11 +162,11 @@ namespace test_strlen_cpp17
         ASSERT_TRUE(me::strlen(std::move(rval)) == len);
     }
 
-} // namespace test_strlen_cpp17
+} // namespace test_strlen_cpp11
 
 //..............................................................................
 
-namespace test_strlen_cpp17
+namespace test_strlen_cpp11
 {
     template<class ch> void array_case()
     {
@@ -218,11 +208,11 @@ namespace test_strlen_cpp17
         test::pointer<volatile const ch* volatile const>();
     }
 
-}// namespace test_strlen_cpp17
+}// namespace test_strlen_cpp11
 
 //..............................................................................
 
-namespace test_strlen_cpp17
+namespace test_strlen_cpp11
 {
 
     template<class ch, class arr>
@@ -268,7 +258,7 @@ namespace test_strlen_cpp17
         test::pointer<volatile const ch* volatile const>(text);
     }
 
-} // namespace test_strlen_cpp17
+} // namespace test_strlen_cpp11
 
 //==============================================================================
 //==============================================================================
@@ -328,5 +318,5 @@ TEST_COMPONENT(005)
 
 //==============================================================================
 //==============================================================================
-#endif // defined(dHAS_CPP17) && !defined(dHAS_CPP20)
+#endif // defined(dHAS_CPP11) && !defined(dHAS_CPP14)
 #endif // !TEST_TOOLS_STRLEN

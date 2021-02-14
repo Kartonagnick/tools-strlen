@@ -32,4 +32,5 @@
 *.app
 
 # Workspace
+CMakeLists.txt.user
 _artifacts

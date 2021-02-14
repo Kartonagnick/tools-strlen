@@ -7,53 +7,27 @@
 #ifdef TEST_TOOLS_STRLEN
 
 #include <tools/features.hpp>
-#if defined(dHAS_CPP17) && !defined(dHAS_CPP20)
+#if !defined(dHAS_CPP11)
 
 #define dTEST_COMPONENT tools
 #define dTEST_METHOD strlen
-#define dTEST_TAG cpp17
+#define dTEST_TAG pre11
 
 #include <tools/strlen.hpp>
 #include "test-staff.hpp"
 
 #ifdef dHAS_RVALUE_ARRAY
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> dHAS_RVALUE_ARRAY")
+    dMESSAGE("[test][pre11] tools/strlen.hpp: enabled -> dHAS_RVALUE_ARRAY")
 #else
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: disabled -> dHAS_RVALUE_ARRAY")
-#endif
-dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> __builtin_strlen")
-#ifdef _HAS_U8_INTRINSICS
-    dMESSAGE("[test][cpp17] tools/strlen.hpp: enabled -> __builtin_u8strlen")
+    dMESSAGE("[test][pre11] tools/strlen.hpp: disabled -> dHAS_RVALUE_ARRAY")
 #endif
 
 namespace me = ::tools;
 using namespace staff;
 //==============================================================================
 //==============================================================================
-namespace test_strlen_cpp17
-{
-    constexpr const char*    meow_a =  "meow";
-    constexpr const wchar_t* meow_w = L"meow";
 
-    static_assert(me::strlen(meow_a) == 4             , "error(1): expected 'true'"  );
-    static_assert(me::strlen(meow_w) == 4             , "error(2): expected 'true'"  );
-    static_assert(me::strlen(std::move(meow_a)) == 4  , "error(3): expected 'true'"  );
-    static_assert(me::strlen(std::move(meow_w)) == 4  , "error(4): expected 'true'"  );
-
-    static_assert(me::strlen(  "meow") == 4           , "error(5): expected 'true'"  );
-    static_assert(me::strlen( L"meow") == 4           , "error(6): expected 'true'"  );
-    static_assert(me::strlen(u8"meow") == 4           , "error(7): expected 'true'"  );
-
-    static_assert(me::strlen(std::move("meow"  )) == 4, "error(8): expected 'true'"  );
-    static_assert(me::strlen(std::move(L"meow" )) == 4, "error(9): expected 'true'"  );
-    static_assert(me::strlen(std::move(u8"meow")) == 4, "error(10): expected 'true'" );
-
-} // namespace test_strlen_cpp17
-namespace test = test_strlen_cpp17;
-
-//..............................................................................
-
-namespace test_strlen_cpp17
+namespace test_strlen_pre11
 {
     template<class type> void array()
     {
@@ -72,36 +46,44 @@ namespace test_strlen_cpp17
 	
     template<class str> void string()
     {
-        using ch = typename str::value_type;
+        typedef typename str::value_type ch;
 
         ch arr[2]  = {};
         str txt    = arr;
         str& ref   = txt;
-        str&& rval = std::move(txt);
 
         ASSERT_TRUE(me::strlen(txt ) == 0);
         ASSERT_TRUE(me::strlen(ref ) == 0);
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        str&& rval = std::move(txt);
         ASSERT_TRUE(me::strlen(rval) == 0);
+
         ASSERT_TRUE(me::strlen(std::move(txt )) == 0);
         ASSERT_TRUE(me::strlen(std::move(ref )) == 0);
         ASSERT_TRUE(me::strlen(std::move(rval)) == 0);
+        #endif
     }
 
     template<class ptr> void pointer()
     {
         ptr val    = 0;
         ptr& ref   = val;
-        ptr&& rval = std::move(ref);
         size_t len = 0;
         ASSERT_DEATH_DEBUG(len = me::strlen(val ));
         ASSERT_DEATH_DEBUG(len = me::strlen(ref ));
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        ptr&& rval = std::move(ref);
         ASSERT_DEATH_DEBUG(len = me::strlen(rval));
+
         ASSERT_DEATH_DEBUG(len = me::strlen(std::move(val )));
         ASSERT_DEATH_DEBUG(len = me::strlen(std::move(ref )));
         ASSERT_DEATH_DEBUG(len = me::strlen(std::move(rval)));
+        #endif
+
         (void) len;
     }
-
 
     #define dINITIALIZE(initial)                        \
         enum { size = sizeof(text) / sizeof(text[0]) }; \
@@ -110,24 +92,13 @@ namespace test_strlen_cpp17
         for (size_t i = 0; i != size; ++i)              \
             initial[i] = static_cast<ch>(text[i]);      \
         ASSERT_TRUE(initial[len] == 0)
-
-    #define dINIT_PTR(initial)                          \
-        using ch = std::remove_cv_t<                    \
-            std::remove_pointer_t<ptr>                  \
-        >;                                              \
-        dINITIALIZE(initial)
-
-    #define dINIT_ARR(initial)                          \
-        using ch = std::remove_cv_t<                    \
-            std::remove_reference_t<type>               \
-        >;                                              \
-        dINITIALIZE(initial)
     
      
-    template<class type, class str> void array(const str& text)
+    template<class ch, class type, class str> void array(const str& text)
     {
-        dINIT_ARR(arr);
+        dINITIALIZE(arr);
         type (&ref)[size] = arr;
+
         ASSERT_TRUE(me::strlen(arr) == len);
         ASSERT_TRUE(me::strlen(ref) == len);
         #ifdef dHAS_RVALUE_ARRAY
@@ -142,41 +113,50 @@ namespace test_strlen_cpp17
 
     template<class str, class arr> void string(const arr& text)
     {
-        using ch = typename str::value_type;
+        typedef typename str::value_type ch;
         dINITIALIZE(initial);
         str txt    = initial;
         str& ref   = txt;
-        str&& rval = std::move(txt);
 
         ASSERT_TRUE(me::strlen(txt ) == len);
         ASSERT_TRUE(me::strlen(ref ) == len);
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        str&& rval = std::move(txt);
         ASSERT_TRUE(me::strlen(rval) == len);
+
         ASSERT_TRUE(me::strlen(std::move(txt )) == len);
         ASSERT_TRUE(me::strlen(std::move(ref )) == len);
         ASSERT_TRUE(me::strlen(std::move(rval)) == len);
+        #endif
     }
 
 
-    template<class ptr, class arr> 
+    template<class ch, class ptr, class arr> 
     void pointer(const arr& text)
     {
-        dINIT_PTR(initial);
+        dINITIALIZE(initial);
         ptr val    = initial;
         ptr& ref   = val;
-        ptr&& rval = std::move(ref);
         ASSERT_TRUE(me::strlen(val ) == len);
         ASSERT_TRUE(me::strlen(ref ) == len);
+
+        #ifdef dHAS_RVALUE_REFERENCES
+        ptr&& rval = std::move(ref);
         ASSERT_TRUE(me::strlen(rval) == len);
+
         ASSERT_TRUE(me::strlen(std::move(val )) == len);
         ASSERT_TRUE(me::strlen(std::move(ref )) == len);
         ASSERT_TRUE(me::strlen(std::move(rval)) == len);
+        #endif
     }
 
-} // namespace test_strlen_cpp17
+} // namespace test_strlen_pre11
+namespace test = test_strlen_pre11;
 
 //..............................................................................
 
-namespace test_strlen_cpp17
+namespace test_strlen_pre11
 {
     template<class ch> void array_case()
     {
@@ -218,20 +198,20 @@ namespace test_strlen_cpp17
         test::pointer<volatile const ch* volatile const>();
     }
 
-}// namespace test_strlen_cpp17
+}// namespace test_strlen_pre11
 
 //..............................................................................
 
-namespace test_strlen_cpp17
+namespace test_strlen_pre11
 {
 
     template<class ch, class arr>
     void array_case(const arr& text)
     {
-        test::array<ch>(text);
-        test::array<const ch>(text);
-        test::array<volatile ch>(text);
-        test::array<volatile const ch>(text);
+        test::array<ch, ch>(text);
+        test::array<ch, const ch>(text);
+        test::array<ch, volatile ch>(text);
+        test::array<ch, volatile const ch>(text);
     }
 
     template<class ch, class arr>
@@ -245,30 +225,30 @@ namespace test_strlen_cpp17
     template<class ch, class arr>
     void pointer_case(const arr& text)
     {
-        test::pointer<ch*>(text);
+        test::pointer<ch, ch*>(text);
        
-        test::pointer<ch* const>(text);
-        test::pointer<ch* volatile>(text);
-        test::pointer<ch* volatile const>(text);
+        test::pointer<ch, ch* const>(text);
+        test::pointer<ch, ch* volatile>(text);
+        test::pointer<ch, ch* volatile const>(text);
        
-        test::pointer<const ch*>(text);
-        test::pointer<volatile ch*>(text);
-        test::pointer<volatile const ch*>(text);
+        test::pointer<ch, const ch*>(text);
+        test::pointer<ch, volatile ch*>(text);
+        test::pointer<ch, volatile const ch*>(text);
        
-        test::pointer<const ch* const>(text);
-        test::pointer<volatile ch* const >(text);
-        test::pointer<volatile const ch* const >(text);
+        test::pointer<ch, const ch* const>(text);
+        test::pointer<ch, volatile ch* const >(text);
+        test::pointer<ch, volatile const ch* const >(text);
        
-        test::pointer<const ch* volatile>(text);
-        test::pointer<volatile ch* volatile >(text);
-        test::pointer<volatile const ch* volatile >(text);
+        test::pointer<ch, const ch* volatile>(text);
+        test::pointer<ch, volatile ch* volatile >(text);
+        test::pointer<ch, volatile const ch* volatile >(text);
        
-        test::pointer<const ch* volatile const>(text);
-        test::pointer<volatile ch* volatile const>(text);
-        test::pointer<volatile const ch* volatile const>(text);
+        test::pointer<ch, const ch* volatile const>(text);
+        test::pointer<ch, volatile ch* volatile const>(text);
+        test::pointer<ch, volatile const ch* volatile const>(text);
     }
 
-} // namespace test_strlen_cpp17
+} // namespace test_strlen_pre11
 
 //==============================================================================
 //==============================================================================
@@ -328,5 +308,5 @@ TEST_COMPONENT(005)
 
 //==============================================================================
 //==============================================================================
-#endif // defined(dHAS_CPP17) && !defined(dHAS_CPP20)
+#endif // !defined(dHAS_CPP11)
 #endif // !TEST_TOOLS_STRLEN
