@@ -26,11 +26,11 @@ namespace tools
 //==============================================================================
 namespace tools
 {
-    #define dNOEXCEPT noexcept
-    #define dTEMPLATE template<class s> inline
-
     namespace old
     {
+        #define dNOEXCEPT noexcept
+        #define dTEMPLATE template<class s> inline
+
         dTEMPLATE size_t strlen(s* text) dNOEXCEPT
         {
             dASSERT(text);
@@ -43,14 +43,22 @@ namespace tools
         size_t strlen(char*    text) dNOEXCEPT;
         size_t strlen(wchar_t* text) dNOEXCEPT;
 
+    } // namespace old
+
+    namespace cpp11
+    {
+        dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return old::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return old::strlen(p); }
+
         template<class ch, size_t n>
         constexpr size_t 
-        strlen(const ch(&text)[n], const size_t beg) dNOEXCEPT
+        strlen(const ch(&text)[n], const size_t i) dNOEXCEPT
         {
-            dASSERT(beg < n);
-            return text[beg] != 0 ?
-                ::tools::old::strlen(text, beg + 1) :
-                beg;
+            dASSERT(i < n);
+            return text[i] != 0 ?
+                ::tools::cpp11::strlen(text, i + 1) : i;
         }
 
         #define dEXPRESSION(...) \
@@ -62,75 +70,39 @@ namespace tools
         #ifndef NDEBUG
         inline size_t limit(const size_t i, const size_t n) dNOEXCEPT
         {
-            dASSERT(n != 0 && i < n &&
-                "tools::strlen: invalid null-terminator");
+            dASSERT(n != 0 && i < n && "tools::strlen: invalid null-terminator");
             return i;
         }
         #endif
 
-    } // namespace old
+        template<class ch, size_t n> inline
+        dBIG_ARRAY strlen(const ch(&text)[n]) dNOEXCEPT
+        {
+            #ifdef NDEBUG
+                return old::strlen(&text[0]);
+            #else
+                return cpp11::limit(old::strlen(&text[0]), n);
+            #endif
+        }
 
-    dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return old::strlen(p); }
+        template<class ch, size_t n> constexpr
+        dSMALL_ARRAY strlen(const ch (&text)[n]) dNOEXCEPT
+            { return ::tools::cpp11::strlen(text, 0); }
 
+        dTEMPLATE 
+        constexpr size_t strlen(const s& text) dNOEXCEPT
+            { return text.length(); }
 
-    template<class ch, size_t n> inline
-    dBIG_ARRAY strlen(const ch(&text)[n]) dNOEXCEPT
-    {
-        const auto* ptr = text;
-        const size_t len = old::strlen(ptr);
-        #ifdef NDEBUG
-            return len;
-        #else
-            return old::limit(len, n);
-        #endif
-    }
+        #undef dEXPRESSION
+        #undef dSMALL_ARRAY
+        #undef dBIG_ARRAY
+        #undef dTEMPLATE
 
-    template<class ch, size_t n> constexpr
-    dSMALL_ARRAY strlen(const ch (&text)[n]) dNOEXCEPT
-    {
-        return ::tools::old::strlen(text, 0);
-    }
+    } // namespace cpp11
 
-    dTEMPLATE constexpr 
-    size_t strlen(const s& text) dNOEXCEPT
-    { 
-        return text.length();
-    }
-
-    //--- rvalue
-
-    dTEMPLATE constexpr
-    size_t strlen(const s&& text) dNOEXCEPT
-    {
-        return text.length();
-    }
-
-    dTEMPLATE size_t strlen(s*&& p)                dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* const&& p)          dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile&& p)       dNOEXCEPT { return old::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const&& p) dNOEXCEPT { return old::strlen(p); }
-
-    #ifdef dHAS_RVALUE_ARRAY
-    template<class ch, size_t n> inline
-    dBIG_ARRAY strlen(const ch(&&text)[n]) dNOEXCEPT
-    {
-        return ::tools::strlen(text);
-    }
-
-    template<class ch, size_t n> constexpr
-    dSMALL_ARRAY strlen(const ch(&&text)[n]) dNOEXCEPT
-    {
-        return ::tools::strlen(text);
-    }
-    #endif
-
-    #undef dEXPRESSION
-    #undef dSMALL_ARRAY
-    #undef dBIG_ARRAY
-    #undef dTEMPLATE
+    template<class s> 
+    constexpr size_t strlen(s&& text) dNOEXCEPT
+        { return cpp11::strlen(text); }
 
 } // namespace tools 
 

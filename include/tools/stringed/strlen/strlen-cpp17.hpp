@@ -14,13 +14,11 @@
 //==============================================================================
 namespace tools
 {
-    #define dNOEXCEPT noexcept
-    #define dHAS_RVALUE_ARRAY 1
-
-    #define dTEMPLATE template<class s> constexpr
-
     namespace cpp17
     {
+        #define dNOEXCEPT noexcept
+        #define dTEMPLATE template<class s> constexpr
+
         dTEMPLATE size_t strlen_(const s* text) dNOEXCEPT
         {
             dASSERT(text);
@@ -74,36 +72,31 @@ namespace tools
 
     } // namespace cpp17
 
-    dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return cpp17::strlen(p); }
-
-    template<class ch, size_t n> constexpr
-    size_t strlen(const ch(&text)[n]) dNOEXCEPT
+    namespace cpp17_detail
     {
-        return cpp17::limit(cpp17::strlen(&text[0]), n);
-    }
+        dTEMPLATE size_t strlen(s*& p)                dNOEXCEPT { return cpp17::strlen(p); }
+        dTEMPLATE size_t strlen(s* const& p)          dNOEXCEPT { return cpp17::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile& p)       dNOEXCEPT { return cpp17::strlen(p); }
+        dTEMPLATE size_t strlen(s* volatile const& p) dNOEXCEPT { return cpp17::strlen(p); }
 
-    dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
-    { 
-        return text.length();
-    }
+        template<class ch, size_t n> constexpr
+        size_t strlen(const ch(&text)[n]) dNOEXCEPT
+        {
+            return cpp17::limit(cpp17::strlen(&text[0]), n);
+        }
 
-    dTEMPLATE size_t strlen(s*&& p)                dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* const&& p)          dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile&& p)       dNOEXCEPT { return cpp17::strlen(p); }
-    dTEMPLATE size_t strlen(s* volatile const&& p) dNOEXCEPT { return cpp17::strlen(p); }
+        dTEMPLATE size_t strlen(const s& text) dNOEXCEPT
+        { 
+            return text.length();
+        }
 
-    #ifdef dHAS_RVALUE_ARRAY
-    template<class ch, size_t n> constexpr
-    size_t strlen(const ch(&&text)[n]) dNOEXCEPT
-    {
-        return ::tools::strlen(text);
-    }
-    #endif
+        #undef dTEMPLATE
 
-    #undef dTEMPLATE
+    }  // namespace cpp17_detail
+
+    template<class s> constexpr
+    size_t strlen(s&& text) dNOEXCEPT
+        { return cpp17_detail::strlen(text); }
 
 } // namespace tools 
 
